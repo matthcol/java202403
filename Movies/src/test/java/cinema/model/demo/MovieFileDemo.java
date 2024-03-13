@@ -1,6 +1,7 @@
 package cinema.model.demo;
 
 import cinema.model.Movie;
+import cinema.utils.CsvAdapter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -9,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 public class MovieFileDemo {
 
@@ -38,12 +38,11 @@ public class MovieFileDemo {
         var path = Path.of(filename);
         System.out.println(path.toFile().exists());
         // lines => Stream<String>
-        var lines = Files.lines(path)
+        var movies = Files.lines(path)
                 .skip(1) // skip headers
-                .limit(3)
+               // .limit(3)
+                .map(CsvAdapter::movieFromLine)
                 .toList();
-        System.out.println(lines);
-        // read all movies from csv file
-        List<Movie> movies;
+        System.out.println(movies);
     }
 }
