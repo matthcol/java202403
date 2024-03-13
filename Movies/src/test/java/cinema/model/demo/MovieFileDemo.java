@@ -40,8 +40,25 @@ public class MovieFileDemo {
         // lines => Stream<String>
         var movies = Files.lines(path)
                 .skip(1) // skip headers
-               // .limit(3)
-                .map(CsvAdapter::movieFromLine)
+//                .skip(800)
+//                .limit(50)
+//                .peek(System.out::println) // manual debug, log, ..
+                .limit(800)
+                .filter(line -> Character.isDigit(line.split(",")[2].charAt(0)))
+                .map(CsvAdapter::movieFromLineDefault)
+                .toList();
+        System.out.println(movies);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = "target/test-classes/movies.tsv")
+    void demoMovieCollectionFromPathTsv(String filename) throws IOException {
+        var path = Path.of(filename);
+        System.out.println(path.toFile().exists());
+        // lines => Stream<String>
+        var movies = Files.lines(path)
+                .skip(1) // skip headers
+                .map(CsvAdapter::movieFromLineTsv)
                 .toList();
         System.out.println(movies);
     }
