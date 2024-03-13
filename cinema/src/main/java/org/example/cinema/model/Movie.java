@@ -1,55 +1,55 @@
-package cinema.model;
+package org.example.cinema.model;
 
-import lombok.ToString;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
-import java.util.StringJoiner;
+import java.util.HashSet;
+import java.util.Set;
 
-@ToString(of={"title", "year"})
+// JPA
+@Entity
+// lombok
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+@ToString(of={"id", "title", "year"})
 public class Movie {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @NotNull
+    @Size(min=1, max=30)
+    @Column(nullable = false, length = 350)
     private String title;
+
+    @Min(1888)
     private int year;
-    private int duration;
 
-    public Movie() {
-    }
+    @Min(40)
+    private Integer duration;
 
-    public Movie(String title, int year, int duration) {
-        this.title = title;
-        this.year = year;
-        this.duration = duration;
-    }
+    @Max(4000)
+    @Column(length = 4000)
+    private String synopsis;
 
-    public String getTitle() {
-        return title;
-    }
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="director_id")
+    private Person director;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-//    @Override
-//    public String toString() {
-//        final StringBuilder sb = new StringBuilder("Movie{");
-//        sb.append("title='").append(title).append('\'');
-//        sb.append(", year=").append(year);
-//        sb.append('}');
-//        return sb.toString();
-//    }
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(
+            name = "play",
+            joinColumns = @JoinColumn(name="movie_id"),
+            inverseJoinColumns = @JoinColumn(name="actor_id")
+    )
+    private Set<Person> actors = new HashSet<>();
 }
