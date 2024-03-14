@@ -2,14 +2,19 @@ package cinema.model.demo;
 
 import cinema.model.Movie;
 import cinema.utils.CsvAdapter;
+import cinema.utils.FilePathResourceUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MovieFileDemo {
 
@@ -21,9 +26,9 @@ public class MovieFileDemo {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = "target/test-classes/movies.csv")
+    @ValueSource(strings = "/movies.csv")
     void demoMovieCollectionFromFile(String filename) throws IOException {
-        File file = new File(filename);
+        File file = FilePathResourceUtils.fileFromResource(getClass(), filename);
         System.out.println(file.exists());
         // readAllLines => List<String>
         var lines = Files.readAllLines(file.toPath());
@@ -33,17 +38,17 @@ public class MovieFileDemo {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = "target/test-classes/movies.csv")
-    void demoMovieCollectionFromPath(String filename) throws IOException {
-        var path = Path.of(filename);
-        System.out.println(path.toFile().exists());
+    @ValueSource(strings = "/movies.csv")
+    void demoMovieCollectionFromPath(String filename) throws IOException, URISyntaxException {
+        var path = FilePathResourceUtils.pathFromResource(getClass(), filename);
+        assertTrue(Files.exists(path));
         // lines => Stream<String>
         var movies = Files.lines(path)
                 .skip(1) // skip headers
 //                .skip(800)
 //                .limit(50)
 //                .peek(System.out::println) // manual debug, log, ..
-                .limit(800)
+                // heuristic filter to avoid titles with char ','
                 .filter(line -> Character.isDigit(line.split(",")[2].charAt(0)))
                 .map(CsvAdapter::movieFromLineDefault)
                 .toList();
@@ -51,11 +56,10 @@ public class MovieFileDemo {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = "target/test-classes/movies.tsv")
+    @ValueSource(strings = "/movies.tsv")
     void demoMovieCollectionFromPathTsv(String filename) throws IOException {
-        var path = Path.of(filename);
-        System.out.println(path.toFile().exists());
-        // lines => Stream<String>
+        var path = FilePathResourceUtils.pathFromResource(getClass(), filename);
+        assertTrue(Files.exists(path));
         var movies = Files.lines(path)
                 .skip(1) // skip headers
                 .map(CsvAdapter::movieFromLineTsv)
