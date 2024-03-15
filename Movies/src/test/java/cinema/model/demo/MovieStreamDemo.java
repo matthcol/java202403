@@ -5,16 +5,17 @@ import cinema.model.Person;
 import cinema.utils.CsvAdapter;
 import cinema.utils.FilePathResourceUtils;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Objects;
-import java.util.OptionalInt;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MovieStreamDemo {
 
@@ -264,5 +265,85 @@ public class MovieStreamDemo {
     }
 
     // Movie + 1 compteur
+
+    static Stream<Comparator<Movie>> movieComparators(){
+        return Stream.of(
+                Comparator.comparing(Movie::getTitle),
+                Comparator.comparing(Movie::getTitle, String::compareToIgnoreCase),
+                Comparator.comparing(Movie::getTitle, Comparator.reverseOrder()),
+                Comparator.comparingInt(Movie::getYear),
+                Comparator.comparingInt(Movie::getYear)
+                        .thenComparing(Movie::getTitle, String::compareToIgnoreCase),
+                // year desc, title CI
+                Comparator.comparingInt(Movie::getYear).reversed()
+                        .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
+                // duration desc, title CI
+                // title length desc, title CI
+                // title CI reversed
+        );
+    }
+    @ParameterizedTest
+    @MethodSource("movieComparators")
+    void demoSortMovies(Comparator<Movie> movieCmp){
+        var sortedMovies = movieList.stream()
+                .sorted(movieCmp)
+                .toList();
+        System.out.println(sortedMovies);
+    }
+
+    static Stream<Arguments> movieNamedComparators(){
+        return Stream.of(
+                Arguments.of(Named.of(
+                        "title ASC",
+                        Comparator.comparing(Movie::getTitle)
+                )),
+                Arguments.of(Named.of(
+                        "title CI ASC",
+                        Comparator.comparing(Movie::getTitle, String::compareToIgnoreCase)
+                )),
+                Arguments.of(Named.of(
+                        "title DESC",
+                        Comparator.comparing(Movie::getTitle, Comparator.reverseOrder())
+                )),
+                Arguments.of(Named.of(
+                        "year ASC",
+                        Comparator.comparingInt(Movie::getYear)
+                )),
+                Arguments.of(Named.of(
+                        "year ASC title CI ASC",
+                        Comparator.comparingInt(Movie::getYear)
+                                .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
+                )),
+                // year desc, title CI
+                Arguments.of(Named.of(
+                        "year DESC title CI ASC",
+                        Comparator.comparingInt(Movie::getYear).reversed()
+                                .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
+                )),
+                // duration desc, title CI
+                Arguments.of(Named.of(
+                        "duration DESC title CI ASC",
+                        Comparator.comparing(Movie::getDuration, Comparator.nullsLast(Comparator.reverseOrder()))
+                                .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
+                ))
+                // title length desc, title CI
+                // title CI reversed
+        );
+    }
+    @ParameterizedTest
+    @MethodSource("movieNamedComparators")
+    void demoSortMovies2(Comparator<Movie> movieCmp){
+        var sortedMovies = movieList.stream()
+                .sorted(movieCmp)
+                .toList();
+        sortedMovies.forEach(m -> System.out.println(
+                MessageFormat.format(
+                        "{0} ({1,number,####}, {2} mn)",
+                        m.getTitle(),
+                        m.getYear(),
+                        m.getDuration()
+                ))
+        );
+    }
 
 }
