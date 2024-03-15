@@ -329,8 +329,24 @@ public class MovieStreamDemo {
                         "title length DESC, title CI ASC",
                         Comparator.comparingInt((Movie m) -> m.getTitle().length()).reversed()
                                 .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
-                ))
+                )),
                 // title CI reversed
+                Arguments.of(Named.of(
+                        "title CI DESC",
+                        Comparator.comparing((Movie m) -> m.getTitle().toLowerCase()).reversed()
+                )),
+                Arguments.of(Named.of(
+                        "title CI DESC 2",
+                        Comparator.comparing(Movie::getTitle, String::compareToIgnoreCase).reversed()
+                )),
+                Arguments.of(Named.of(
+                        "title CI DESC 3",
+                        Comparator.comparing((Movie m) -> m.getTitle().toLowerCase(), Comparator.reverseOrder())
+                )),
+                Arguments.of(Named.of(
+                        "title CI DESC 3",
+                        Comparator.comparing(Movie::getTitle, (t1, t2) -> t2.compareToIgnoreCase(t1))
+                ))
         );
     }
     @ParameterizedTest
