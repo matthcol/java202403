@@ -310,23 +310,26 @@ public class MovieStreamDemo {
                         Comparator.comparingInt(Movie::getYear)
                 )),
                 Arguments.of(Named.of(
-                        "year ASC title CI ASC",
+                        "year ASC, title CI ASC",
                         Comparator.comparingInt(Movie::getYear)
                                 .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
                 )),
-                // year desc, title CI
                 Arguments.of(Named.of(
-                        "year DESC title CI ASC",
+                        "year DESC title, CI ASC",
                         Comparator.comparingInt(Movie::getYear).reversed()
                                 .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
                 )),
-                // duration desc, title CI
                 Arguments.of(Named.of(
-                        "duration DESC title CI ASC",
+                        "duration DESC, title CI ASC",
                         Comparator.comparing(Movie::getDuration, Comparator.nullsLast(Comparator.reverseOrder()))
                                 .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
+                )),
+                //
+                Arguments.of(Named.of(
+                        "title length DESC, title CI ASC",
+                        Comparator.comparingInt((Movie m) -> m.getTitle().length()).reversed()
+                                .thenComparing(Movie::getTitle, String::compareToIgnoreCase)
                 ))
-                // title length desc, title CI
                 // title CI reversed
         );
     }
@@ -338,7 +341,7 @@ public class MovieStreamDemo {
                 .toList();
         sortedMovies.forEach(m -> System.out.println(
                 MessageFormat.format(
-                        "{0} ({1,number,####}, {2} mn)",
+                        "- {0} ({1,number,####}, {2} mn)",
                         m.getTitle(),
                         m.getYear(),
                         m.getDuration()
